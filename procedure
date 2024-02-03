@@ -1,3 +1,10 @@
+6. It is now time to write the stored procedures necessary for creating and handling a reservation from the front-end. In addition to the input and output detailed below, see the test-files for appropriate error-messages to return in case of unsuccessful payments etc.
+a) Create a reservation on a specific flight. Procedure call: addReservation(departure_airport_code, arrival_airport_code, year, week, day, time, number_of_passengers, output_reservation_nr); where the number_of_passengers is the number of passengers the reservation is for 
+(and only used to check that enough unpaid seats are available) and output_reservation_nr is an output-variable and should contain the assigned reservation number.
+b) Add a passenger to a reservation: Procedure call to handle: addPassenger(reservation_nr, passport_number, name);
+c) Add a contact: Procedure call to handle: addContact(reservation_nr, passport_number, email, phone); where the contact already must be added as a passenger to the reservation.
+d) Add a payment: Procedure call to handle: addPayment (reservation_nr, cardholder_name, credit_card_number); This procedure should, if the reservation has a contact and there are enough unpaid seats on the plane, add payment information to the reservation and save the amount to be drawn from the credit card in the database. If the conditions above are not fulfilled the appropriate error message should be shown.
+
 drop procedure if exists addReservation;
 drop procedure if exists addPassenger;
 drop procedure if exists addContact;
