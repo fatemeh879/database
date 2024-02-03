@@ -1,0 +1,57 @@
+drop procedure if exists addReservation;
+drop procedure if exists addPassenger;
+drop procedure if exists addContact;
+drop procedure if exists addPayment;
+
+DELIMITER //
+
+CREATE PROCEDURE addReservation(
+    IN departure_airport_code VARCHAR(3),
+    IN arrival_airport_code VARCHAR(3),
+    IN year_num INT,
+    IN week_num INT,
+    IN day VARCHAR(10),
+    IN time TIME,
+    IN number_of_passengers INT,
+    OUT output_reservation_nr INT
+)
+BEGIN
+    DECLARE route_num INT;
+    DECLARE available_seats INT;
+    DECLARE reservation_id INT;
+    declare weekly_scheduleID INT;
+    declare flight_num int ;
+    
+
+    -- Get route number
+    SELECT route_number INTO route_num
+    FROM route
+    WHERE airport_code_start = departure_airport_code
+    AND airport_code_stop = arrival_airport_code
+    AND year_number = year_num;	
+    select weekly_schedule_id into weekly_scheduleID
+       from weekly_schedule 
+        where  week_day = day and route_number=route_num and year_number=year_num and departure_time=time;
+
+		select flight_number into flight_num
+        from flight 
+         where week_number=week_num  and weekly_schedule_id=weekly_scheduleID;
+         
+    if weekly_scheduleID is null then select "There exist no flight for the given route, date and time" as "Message";
+	elseif number_of_passengers<= 40 then
+        select f.flight_number into flight_num from flight f , weekly_schedule ws
+	     where f.weekly_schedule_id=ws.weekly_schedule_id  and ws.year_number= year_num and ws.week_day=week_num and ws.departure_time=time ;
+	    select "Ok." as "Message";
+		insert into reservation(number_of_passenger, flight_number) values (number_of_passengers,flight_num);
+            
+        -- Get the reservation number
+        SET reservation_id = LAST_INSERT_ID();
+        SET output_reservation_nr = reservation_id;
+
+    ELSE
+	select "There are not enough seats available on the chosen flight." as "Message";
+    END IF;
+END //
+
+DELIMITER ;
+
